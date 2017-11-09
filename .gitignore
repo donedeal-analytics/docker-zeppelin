@@ -1,2 +1,4 @@
-./notebooks/
-./docker-compose.yml
+notebooks/*
+data/*
+!notebooks/__EMPTY__
+!data/__EMPTY__
