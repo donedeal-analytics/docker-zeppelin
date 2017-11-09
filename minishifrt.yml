@@ -1,0 +1,121 @@
+kind: Template
+apiVersion: v1
+metadata:
+  name: zeppelin
+  annotations:
+    description: Run front end API for the car prediction
+    iconClass: icon-python
+    tags: zeppelin
+labels:
+  app: zeppelin
+  createdBy: template-zeppelin
+objects:
+- kind: ImageStream
+  apiVersion: v1
+  metadata:
+    labels:
+      app: zeppelin
+    name: zeppelin
+  spec:
+    dockerImageRepository:
+    tags:
+      - name: latest
+- kind: BuildConfig
+  apiVersion: v1
+  metadata:
+    name: zeppelin
+    labels:
+      app: zeppelin
+  spec:
+    source:
+      type: Binary
+      binary: {}
+    strategy:
+      type: Docker
+      dockerStrategy:
+        forcePull: true
+        noCache: true
+    output:
+      to:
+        kind: ImageStreamTag
+        name: zeppelin:latest
+- kind: DeploymentConfig
+  apiVersion: v1
+  metadata:
+    name: zeppelin-api
+    labels:
+      app: zeppelin
+      dc: zeppelin
+  replicas: 2
+  spec:
+    selector:
+      dc: zeppelin
+    strategy:
+      type: Recreate
+    triggers:
+    - type: ConfigChange
+    - type: ImageChange
+      imageChangeParams:
+        automatic: true
+        containerNames:
+        - zeppelin
+        from:
+          kind: ImageStreamTag
+          name: zeppelin:latest
+    template:
+      metadata:
+        name: zeppelin
+        labels:
+          dc: zeppelin
+          app: zeppelin
+      spec:
+        containers:
+          - name: zeppelin
+            image: zeppelin
+            imagePullPolicy: Always
+            ports:
+            - name: zeppelin-nb
+              containerPort: 5000
+              protocol: TCP
+            livenessProbe:
+              exec:
+                command:
+                - cat
+                - /tmp/
+              initialDelaySeconds: 15
+              timeoutSeconds: 1
+            readinessProbe:
+               exec:
+                command:
+                - cat
+                - /tmp/
+               initialDelaySeconds: 15
+               timeoutSeconds: 1
+        securityContext:
+          runAsUser: 1000060000
+- kind: Service
+  apiVersion: v1
+  metadata:
+    name: zeppelin
+    labels:
+      app: zeppelin
+  spec:
+    ports:
+    - name: 8080-zeppelin-notebook
+      port: 8080
+      targetPort: 8080
+    selector:
+      dc: zeppelin
+- kind: Route
+  apiVersion: v1
+  metadata:
+    name: zeppelin
+    labels:
+      app: zeppelin
+  spec:
+    port:
+      targetPort: 8080
+    to:
+      kind: Service
+      name: zeppelin
+
