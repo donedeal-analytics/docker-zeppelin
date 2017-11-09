@@ -27,7 +27,13 @@ priyanka = distilled123!
 rory = distilled123!
 ```
 
-## Minishift
+## Minishift Deployment
+
+### Start minishift with some extra memory
+
+```bash
+minishift start --memory 5GB
+```
 
 ### load template
 ```bash
@@ -46,5 +52,5 @@ oc delete routes --all
 oc delete is --all
 
 
-## Openshift
+## OpenShift Deployment
 WIP
