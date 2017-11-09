@@ -60,6 +60,13 @@ RUN set -ex \
  && rm -rf /root/.cache/bower \
  && rm -rf /tmp/*
 
+
+# Authentication
+COPY conf/shiro.ini $ZEPPELIN_HOME/conf/shiro.ini
+
+# Spark submit extra jars
+COPY conf/zeppelin-env.sh $ZEPPELIN_HOME/conf/zeppelin-env.sh
+
 RUN ln -s /usr/bin/pip3 /usr/bin/pip \
  && ln -s /usr/bin/python3 /usr/bin/python
 
